@@ -20,7 +20,7 @@
         </a-entity>
 
 <!-- 音楽を流します -->
-        <audio src="./HappyBirthday.wav" autoplay loop>
+        <audio id="birthdayAudio" src="./HappyBirthday.wav" loop>
           あなたのブラウザーは <code>audio</code>要素をサポートしていません。
         </audio>
 
@@ -28,7 +28,16 @@
       <a-entity camera></a-entity>
     </a-scene>
 
- 
+    <script>
+      const audio = document.querySelector('#birthdayAudio');
+      const marker = document.querySelector('a-marker');
+
+      marker.addEventListener('markerFound', () => {
+        audio.play().catch(() => {
+          document.addEventListener('click', () => audio.play(), { once: true });
+        });
+      });
+    </script>
   </body>
 </html>
 
