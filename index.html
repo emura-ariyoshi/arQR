@@ -13,6 +13,8 @@
       音声を有効にする
     </button>
 
+    <audio id="birthdayAudio" src="./HappyBirthday.wav" loop preload="auto"></audio>
+
     <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker type="pattern" preset="custom" url="./pattern-QR.patt" patternRatio="0.5">
         <a-entity
@@ -23,11 +25,6 @@
           animation-mixer>
         </a-entity>
 
-<!-- 音楽を流します -->
-        <audio id="birthdayAudio" src="./HappyBirthday.wav" loop>
-          あなたのブラウザーは <code>audio</code>要素をサポートしていません。
-        </audio>
-
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
@@ -37,6 +34,8 @@
       const marker = document.querySelector('a-marker');
       const startAudio = document.querySelector('#startAudio');
       let audioUnlocked = false;
+      let markerVisible = false;
+      let lostTimer;
 
       async function unlockAudio() {
         try {
@@ -55,14 +54,22 @@
       startAudio.addEventListener('click', unlockAudio);
 
       marker.addEventListener('markerFound', () => {
+        markerVisible = true;
+        clearTimeout(lostTimer);
         if (audioUnlocked) {
           audio.play().catch((error) => console.error('音声を再生できませんでした:', error));
         }
       });
 
       marker.addEventListener('markerLost', () => {
-        audio.pause();
-        audio.currentTime = 0;
+        markerVisible = false;
+        clearTimeout(lostTimer);
+        lostTimer = setTimeout(() => {
+          if (!markerVisible) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+        }, 1000);
       });
     </script>
   </body>
