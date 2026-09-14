@@ -9,6 +9,10 @@
   </head>
 
   <body style="margin: 0; overflow: hidden;">
+    <button id="startAudio" type="button" style="position: fixed; z-index: 10; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 18px; font-size: 16px;">
+      音声を有効にする
+    </button>
+
     <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker type="pattern" preset="custom" url="./pattern-QR.patt" patternRatio="0.5">
         <a-entity
@@ -31,11 +35,34 @@
     <script>
       const audio = document.querySelector('#birthdayAudio');
       const marker = document.querySelector('a-marker');
+      const startAudio = document.querySelector('#startAudio');
+      let audioUnlocked = false;
+
+      async function unlockAudio() {
+        try {
+          audio.muted = true;
+          await audio.play();
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+          audioUnlocked = true;
+          startAudio.hidden = true;
+        } catch (error) {
+          console.error('音声を有効にできませんでした:', error);
+        }
+      }
+
+      startAudio.addEventListener('click', unlockAudio);
 
       marker.addEventListener('markerFound', () => {
-        audio.play().catch(() => {
-          document.addEventListener('click', () => audio.play(), { once: true });
-        });
+        if (audioUnlocked) {
+          audio.play().catch((error) => console.error('音声を再生できませんでした:', error));
+        }
+      });
+
+      marker.addEventListener('markerLost', () => {
+        audio.pause();
+        audio.currentTime = 0;
       });
     </script>
   </body>
